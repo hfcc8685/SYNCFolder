@@ -1,8 +1,6 @@
 body {
 	padding-top: 70px; 
 	background-color: rgb(240, 246, 252);
-	overflow-x: hidden;
-	overflow-y: hidden;
 	-webkit-app-region: drag;
 }
 
