@@ -4,6 +4,7 @@ var gui = require('nw.gui');
 var win = gui.Window.get();
 
 var ConfigFilePath = path.join(path.dirname(process.execPath),"config.json");
+var SyncFolderPanelIndex = 1;
 
 $(function(){
 
@@ -14,7 +15,7 @@ $(function(){
 		else{
 			var config = JSON.parse(data);
 			$.each(config.pathPair,function(){				
-				AddSyncNode(this.sourcePath,this.targetPath);				
+				AddSyncNode(this.name,this.sourcePath,this.targetPath);				
 			});			
 		}
 	});
@@ -36,9 +37,10 @@ $(function(){
 	});
 
 	$('#btn-Add').click(function(){
+		var syncName = $("#tb-Name").val();
 		var sourcePath = $("#tb-Source").val();
-		var targetPath = $("#tb-Target").val();
-		AddSyncNode(sourcePath,targetPath);
+		var targetPath = $("#tb-Target").val();		
+		AddSyncNode(syncName,sourcePath,targetPath);
 
 		fs.readFile(ConfigFilePath,function (err, data){
 			if(err){
@@ -47,6 +49,7 @@ $(function(){
 			else{
 				var config = JSON.parse(data);
 				var tempPathPair = {
+					"name": syncName,
 					"sourcePath": sourcePath,
 					"targetPath": targetPath
 				}
@@ -54,73 +57,69 @@ $(function(){
 				fs.writeFile(ConfigFilePath,JSON.stringify(config),function(err){
 					if(err)
 						showError(err.toString());
-				});	
+				});
+
+				$("#tb-Name").val("");
+				$("#tb-Source").val("");
+				$("#tb-Target").val("");
 			}
 		});
 	});
 });
 
+function AddSyncNode(name,sourcePath,targetPath) {	
+	var panelId = "panelName"+SyncFolderPanelIndex;
+	var btnOne = "btnOne"+SyncFolderPanelIndex;
+	var btnTwo = "btnTwo"+SyncFolderPanelIndex;
+	SyncFolderPanelIndex++;
 
-function AddSyncNode(sourcePath,targetPath) {
-	var row = document.createElement("div");
-	row.className = "row";
-
-	var col = document.createElement("div");
-	col.className = "col-md-12";
-
-	var ul = document.createElement("ul");
-	ul.className = "list-group";
+	var html = '<div class="row">'+ 
+					'<div class="col-md-12">'+
+						'<div class="panel panel-primary">'+
+							'<div class="panel-heading">'+
+								'<h4 class="panel-title pull-left">'+ 
+									'<a class="panel-a-titile" data-toggle="collapse" data-parent="#accordion" href="#'+panelId+'">'
+									+name+
+									'</a>'+
+								'</h4>'+
+								'<div class="btn-group btn-group-sm pull-right">'+
+								'<button class="btn btn-success" data-loading-text="同步中......" type="button" id="'+btnOne+'">'+
+									'<span class="glyphicon glyphicon-open"></span> 正向同步'+
+								'</button>'+
+								'<button class="btn btn-danger" data-loading-text="同步中......" type="button" id="'+btnTwo+'">'+
+									'<span class="glyphicon glyphicon-save"></span> 逆向同步'+
+								'</button>'+
+								'</div>'+
+								'<div class="clearfix"></div>'+
+							'</div>'+
+							'<div id="'+panelId+'" class="panel-collapse collapse">'+							
+								'<div class="panel-body">'+
+									'<ul class="list-group">'+
+										'<li class="list-group-item text-success">'+sourcePath+'</li>'+ 
+										'<li class="list-group-item text-danger">'+targetPath+'</li>'+						
+									'</ul>'+
+								'</div>'+ 
+							'</div>'+
+						'</div>'+
+					'</div>'+
+				'</div>';
 	
-	var sourceli = document.createElement("li");
-	sourceli.className = "list-group-item text-primary";
-	sourceli.appendChild(document.createTextNode(sourcePath));
+    $("#rowContainer").append(html);
 
-	var targetli = document.createElement("li");
-	targetli.className = "list-group-item text-danger";
-	targetli.appendChild(document.createTextNode(targetPath));
+	var btn1 = document.getElementById(btnOne);
+	btn1.addEventListener("click", function() {
+		var btn3 = $(this);
+		btn3.button('loading');
+		SyncFolder(sourcePath,targetPath,btn3);
+	}, false);
 
-	var syncBtnli = document.createElement("li");
-	syncBtnli.className = "list-group-item clearfix";
 
-	var syncBtn = document.createElement("BUTTON");
-	syncBtn.className = "btn btn-success pull-left";
-	syncBtn.setAttribute("data-loading-text", "同步中......");
-	syncBtn.setAttribute("type","button");
-	var btnSpan = document.createElement("span");	
-	btnSpan.className = "glyphicon glyphicon-open";
-	syncBtn.appendChild(btnSpan);
-	syncBtn.appendChild(document.createTextNode(" 正向同步"));
-	syncBtn.addEventListener("click", function(){						
-		var btn = $(this)
-    	btn.button('loading')
-		SyncFolder(sourcePath,targetPath,btn);	
-	} , false);
-
-	var reverseSyncBtn = document.createElement("BUTTON");
-	reverseSyncBtn.className = "btn btn-danger pull-right";
-	reverseSyncBtn.setAttribute("data-loading-text", "同步中......");
-	reverseSyncBtn.setAttribute("type","button");
-	var reverseSyncBtnSpan = document.createElement("span");
-	reverseSyncBtnSpan.className = "glyphicon glyphicon-save";
-	reverseSyncBtn.appendChild(reverseSyncBtnSpan);
-	reverseSyncBtn.appendChild(document.createTextNode(" 逆向同步"));
-	reverseSyncBtn.addEventListener("click", function(){					
-		var btn = $(this)
-    	btn.button('loading')
-		SyncFolder(targetPath,sourcePath,btn);
-	},false);
-
- 	syncBtnli.appendChild(syncBtn);
- 	syncBtnli.appendChild(reverseSyncBtn);
-
-	ul.appendChild(sourceli);
-	ul.appendChild(targetli);
-	ul.appendChild(syncBtnli);
-
-	col.appendChild(ul);
-	row.appendChild(col);
-
- 	$("#rowContainer").append(row);
+	var btn2 = document.getElementById(btnTwo);
+	btn2.addEventListener("click", function() {
+		var btn4 = $(this);
+		btn4.button('loading');
+		SyncFolder(targetPath,sourcePath,btn4);
+	}, false);
 }
 
 function SyncFolder(sourcePath,targetPath,btn){

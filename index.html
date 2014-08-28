@@ -24,7 +24,9 @@
 	<!--main start-->
 	<div class="content">		
 		<div class="container" id="rowContainer">
-			<div class="panel panel-info">
+			<div class="row">
+			<div class="col-md-12">
+			<div class="panel panel-success">
 				<div class="panel-heading">
 					<h4 class="panel-title">
 						<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
@@ -35,7 +37,13 @@
 				<div id="collapseOne" class="panel-collapse collapse">
 					<div class="panel-body">
 						<ul class="list-group">
-							<li class="list-group-item text-success">添加同步文件夹(同步时先会删除目标文件夹下的所有文件,再同步):</li>
+							<li class="list-group-item text-danger">添加同步文件夹(同步时先会删除目标文件夹下的所有文件,再同步):</li>
+							<li class="list-group-item">
+								<div class="input-group">
+									<span class="input-group-addon"><span class="glyphicon glyphicon-bookmark"></span> </span>
+									<input type="text" class="form-control" placeholder="给此同步起个名字吧~" id="tb-Name">
+								</div>
+							</li>
 							<li class="list-group-item">
 								<div class="input-group">
 									<span class="input-group-addon"><span class="glyphicon glyphicon-folder-open"></span> </span>
@@ -52,7 +60,9 @@
 						</ul>												
 					</div>
 				</div>
-			</div>			
+			</div>
+			</div>
+			</div>
 		</div>
 	</div>
 	<!--main end-->
